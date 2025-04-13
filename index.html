@@ -6,6 +6,29 @@
     <title>Document</title>
 </head>
 <body>
-    Hello world !
+    <div style="display: flex; justify-content: center; align-items: center; flex-direction: column ; background-color: papayawhip; width: 100%; height: 100vh;">
+        <p style="font-size: 30px; font-family: 'Times New Roman', Times, serif; font-weight: 700;">Flow Track</p>
+        <div>
+            <input type="text" placeholder="Task name">
+            <button id ="btn">Start Task</button>
+        </div>
+    </div>
+    <script>
+        let taskRunning = false;
+        const btn = document.getElementById("btn");
+        const input = document.querySelector("input");
+        btn.addEventListener('click' , async () => {
+            if(!taskRunning) {
+                const taskName = input.value.trim();
+                if(!taskName) return alert("please enter task name");
+                await window.electronAPI.startTask(taskName);
+                btn.innerHTML = "Stop Task";
+            } else {
+                await window.electronAPI.stopTask();
+                btn.innerHTML = "Start Task";
+            }
+            taskRunning = !taskRunning;
+        })
+    </script>
 </body>
 </html>
