@@ -12,6 +12,7 @@
             <input type="text" placeholder="Task name">
             <button id ="btn">Start Task</button>
         </div>
+        <div id="replay-buttons" style="margin-top: 15px;"></div>
     </div>
     <script>
         let taskRunning = false;
@@ -25,10 +26,27 @@
                 btn.innerHTML = "Stop Task";
             } else {
                 await window.electronAPI.stopTask();
+                await loadTasks();
+                location.reload();
                 btn.innerHTML = "Start Task";
             }
             taskRunning = !taskRunning;
-        })
+        });
+        async function loadTasks() {
+        const files = await window.electronAPI.getTaskFiles();
+        const container = document.getElementById('replay-buttons');
+        container.innerHTML = '';
+        files.forEach(file => {
+            const btn = document.createElement('button');
+            btn.innerText = `Replay ${file}`;
+            console.log(file);
+            btn.onclick = async () => {
+            await window.electronAPI.replayTask(file);
+            };
+            container.appendChild(btn);
+        });
+        }
+        loadTasks();
     </script>
 </body>
 </html>

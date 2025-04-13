@@ -9,7 +9,11 @@ let activeTaskName = null;
 let tray;
 let win;
 
-ipcMain.on('start-task', (event, taskName) => {
+const tasksFolder = path.join(__dirname, 'tasks');
+if (!fs.existsSync(tasksFolder)) fs.mkdirSync(tasksFolder);
+
+
+  ipcMain.on('start-task', (event, taskName) => {
     if (loggerProcess) return;
   
     recordedData = [];
@@ -39,7 +43,8 @@ ipcMain.on('start-task', (event, taskName) => {
       loggerProcess = null;
   
       const filename = `${activeTaskName.replace(/\s+/g, '_')}_${Date.now()}.json`;
-      fs.writeFileSync(filename, JSON.stringify(recordedData, null, 2));
+      const filePath = path.join(tasksFolder, filename);
+      fs.writeFileSync(filePath, JSON.stringify(recordedData, null, 2));
       console.log(`Saved to ${filename}`);
     });
   
@@ -52,6 +57,16 @@ ipcMain.on('start-task', (event, taskName) => {
       console.log('Stopped task and saving data...');
     }
   });
+  ipcMain.handle('get-task-files', () => {
+    return fs.readdirSync(tasksFolder).filter(file => file.endsWith('.json'));
+  });
+  ipcMain.on('replay-task', (event, filename) => {
+    const filepath = path.join(tasksFolder, filename);
+    spawn('python', ['replay.py', filepath]);
+    console.log("Replaying completed");
+  });
+    
+  
 
 const createWindow = () => {
     win = new BrowserWindow({
